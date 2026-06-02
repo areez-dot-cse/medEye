@@ -25,71 +25,67 @@ async function verifyPrescription() {
     return;
   }
 
+  document.getElementById("verificationCard").style.display = "block";
+
   const response = await fetch(`${API_URL}/verify/prescription/${uid}`);
 
   const data = await response.json();
 
   if (!response.ok) {
     result.innerHTML = `
-            <div class="alert alert-danger">
-
-                INVALID PRESCRIPTION
-
-            </div>
-            `;
+      <div class="alert alert-danger">
+          INVALID PRESCRIPTION
+      </div>
+    `;
 
     return;
   }
 
   result.innerHTML = `
-        <div class="alert alert-success">
+    <div class="alert alert-success">
+        VALID PRESCRIPTION
+    </div>
 
-            VALID PRESCRIPTION
+    <p>
+        <strong>UID:</strong>
+        ${data.prescription.prescription_uid}
+    </p>
 
-        </div>
+    <p>
+        <strong>Doctor:</strong>
+        ${data.prescription.name}
+    </p>
 
-        <p>
-            <strong>UID:</strong>
-            ${data.prescription.prescription_uid}
-        </p>
+    <p>
+        <strong>Drug:</strong>
+        ${data.prescription.drug_code}
+    </p>
 
-        <p>
-            <strong>Doctor:</strong>
-            ${data.prescription.name}
-        </p>
+    <p>
+        <strong>Strip Count:</strong>
+        ${data.prescription.strip_count}
+    </p>
 
-        <p>
-            <strong>Drug:</strong>
-            ${data.prescription.drug_code}
-        </p>
+    <p>
 
-        <p>
-            <strong>Strip Count:</strong>
-            ${data.prescription.strip_count}
-        </p>
+        <strong>Status:</strong>
 
-        <p>
-            <strong>Status:</strong>
+        ${
+          data.prescription.status === "active"
+            ? `
+            <span class="badge bg-success">
+                Active
+            </span>
+            `
+            : `
+            <span class="badge bg-secondary">
+                Used
+            </span>
+            `
+        }
 
-${
-  data.prescription.status === "active"
-    ? `
-    <span
-        class="badge bg-success"
-    >
-        Active
-    </span>
-    `
-    : `
-    <span
-        class="badge bg-secondary"
-    >
-        Used
-    </span>
-    `
-}
-        </p>
-        `;
+    </p>
+  `;
 }
 
 async function orderMedicine() {
@@ -98,6 +94,8 @@ async function orderMedicine() {
   if (!prescriptionUid) {
     return;
   }
+
+  document.getElementById("orderResultCard").style.display = "block";
 
   const response = await fetch(`${API_URL}/order`, {
     method: "POST",
@@ -117,62 +115,48 @@ async function orderMedicine() {
 
   if (!response.ok) {
     orderResult.innerHTML = `
-            <div class="alert alert-danger">
-
-                ${data.message}
-
-            </div>
-            `;
+      <div class="alert alert-danger">
+          ${data.message}
+      </div>
+    `;
 
     return;
   }
 
   orderResult.innerHTML = `
-        <div class="alert alert-success">
+    <div class="alert alert-success">
 
-            Medicine Dispensed Successfully
+        Medicine Dispensed Successfully
 
-        </div>
+    </div>
 
-        <p>
-            <strong>
-                Prescription:
-            </strong>
+    <p>
+        <strong>Prescription:</strong>
+        ${data.prescriptionUid}
+    </p>
 
-            ${data.prescriptionUid}
-        </p>
+    <p>
+        <strong>Assigned Strip:</strong>
+        ${data.stripUid}
+    </p>
 
-        <p>
-            <strong>
-                Assigned Strip:
-            </strong>
+    <p>
+        <strong>Drug:</strong>
+        ${data.drugCode}
+    </p>
 
-            ${data.stripUid}
-        </p>
+    <p>
+        <strong>Batch:</strong>
+        ${data.batchUid}
+    </p>
 
-        <p>
-            <strong>
-                Drug:
-            </strong>
-
-            ${data.drugCode}
-        </p>
-
-        <p>
-            <strong>
-                Batch:
-            </strong>
-
-            ${data.batchUid}
-        </p>
-
-        <button
-            class="btn btn-primary mt-2"
-            onclick="verifyAssignedStrip('${data.stripUid}')"
-        >
-            Verify Assigned Strip
-        </button>
-        `;
+    <button
+        class="btn btn-primary mt-2"
+        onclick="verifyAssignedStrip('${data.stripUid}')"
+    >
+        Verify Assigned Strip
+    </button>
+  `;
 }
 
 async function verifyStrip() {
@@ -182,71 +166,69 @@ async function verifyStrip() {
     return;
   }
 
+  document.getElementById("verificationCard").style.display = "block";
+
   const response = await fetch(`${API_URL}/verify/strip/${uid}`);
 
   const data = await response.json();
 
   if (!response.ok) {
     result.innerHTML = `
-            <div class="alert alert-danger">
-
-                COUNTERFEIT MEDICINE
-
-            </div>
-            `;
+      <div class="alert alert-danger">
+          COUNTERFEIT MEDICINE
+      </div>
+    `;
 
     return;
   }
 
   result.innerHTML = `
-        <div class="alert alert-success">
+    <div class="alert alert-success">
 
-            AUTHENTIC MEDICINE
+        AUTHENTIC MEDICINE
 
-        </div>
+    </div>
 
-        <p>
-            <strong>Strip UID:</strong>
-            ${data.strip.strip_uid}
-        </p>
+    <p>
+        <strong>Strip UID:</strong>
+        ${data.strip.strip_uid}
+    </p>
 
-        <p>
-            <strong>Drug:</strong>
-            ${data.strip.drug_code}
-        </p>
+    <p>
+        <strong>Drug:</strong>
+        ${data.strip.drug_code}
+    </p>
 
-        <p>
-            <strong>Manufacturer:</strong>
-            ${data.strip.company_name}
-        </p>
+    <p>
+        <strong>Manufacturer:</strong>
+        ${data.strip.company_name}
+    </p>
 
-        <p>
-            <strong>Batch:</strong>
-            ${data.strip.batch_uid}
-        </p>
+    <p>
+        <strong>Batch:</strong>
+        ${data.strip.batch_uid}
+    </p>
 
-        <p>
-            <strong>Status:</strong>
+    <p>
 
-${
-  data.strip.status === "available"
-    ? `
-    <span
-        class="badge bg-warning text-dark"
-    >
-        Available
-    </span>
-    `
-    : `
-    <span
-        class="badge bg-info"
-    >
-        Dispensed
-    </span>
-    `
-}
-        </p>
-        `;
+        <strong>Status:</strong>
+
+        ${
+          data.strip.status === "available"
+            ? `
+            <span class="badge bg-warning text-dark">
+                Available
+            </span>
+            `
+            : `
+            <span class="badge bg-info">
+                Dispensed
+            </span>
+            `
+        }
+
+    </p>
+  `;
 }
 
 async function startScanner() {
@@ -261,22 +243,16 @@ async function startScanner() {
       qrbox: 350,
     },
     async (decodedText) => {
-      console.log("QR DETECTED");
-      console.log(decodedText);
       await scanner.stop();
 
       handleScannedQr(decodedText);
     },
-    (errorMessage) => {
-      console.log(errorMessage);
-    },
+    () => {},
   );
 }
 
 function handleScannedQr(decodedText) {
   try {
-    console.log("HANDLE QR");
-    console.log(decodedText);
     const qrData = JSON.parse(decodedText);
 
     const uid = qrData.uid;
@@ -307,5 +283,6 @@ function handleScannedQr(decodedText) {
 
 async function verifyAssignedStrip(stripUid) {
   document.getElementById("stripUid").value = stripUid;
+
   await verifyStrip();
 }

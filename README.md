@@ -1,408 +1,499 @@
 # MedEye
 
-## Secure Prescription Verification & Anti-Counterfeit Medicine Tracking System
+## Secure Prescription Tracking & Medicine Verification System
 
-MedEye is a healthcare security platform designed to combat counterfeit medicines and forged prescriptions through cryptographic verification, QR-based traceability, role-based access control, and end-to-end medicine lifecycle tracking.
+MedEye is a full-stack healthcare traceability platform designed to combat counterfeit medicines through prescription tracking, medicine verification, QR-based authentication, and supply chain transparency.
 
-The system establishes trust between regulatory authorities, doctors, manufacturers, and consumers by ensuring that:
-
-* Only authorized doctors can issue prescriptions.
-* Only authorized manufacturers can create medicine batches.
-* Every prescription is cryptographically verifiable.
-* Every medicine strip is uniquely identifiable and traceable.
-* Counterfeit medicines can be detected instantly.
-* Prescription reuse and medicine strip reuse are prevented.
+The platform establishes a secure chain of trust between healthcare authorities, doctors, manufacturers, and consumers, ensuring that medicines can be tracked and verified throughout their lifecycle—from prescription issuance to final dispensing and authenticity validation.
 
 ---
 
-# Key Features
+## Demo
 
-## Authority-Controlled Ecosystem
+### Complete Workflow Demonstration
 
-A central authority manages and controls participation in the network.
+![Workflow Demo](./screenshots/order-workflow.gif)
 
-### Authority Capabilities
+The demonstration showcases the consumer verification and dispensing workflow within MedEye.:
+
+1. Prescription verification by the consumer
+2. Medicine ordering using a valid prescription
+3. Automatic strip allocation
+4. Dispensing process
+5. Medicine authenticity verification
+
+---
+
+## Problem Statement
+
+Counterfeit medicines remain a major global healthcare challenge, causing financial losses, treatment failures, and serious risks to patient safety.
+
+Traditional pharmaceutical distribution systems often lack:
+
+* Prescription traceability
+* Supply chain transparency
+* Consumer verification mechanisms
+* Real-time authenticity validation
+* End-to-end medicine tracking
+
+As a result, consumers may unknowingly purchase or consume counterfeit medicines.
+
+MedEye addresses these challenges by providing a secure digital verification ecosystem capable of tracking medicines from prescription generation to final consumer verification.
+
+---
+
+## Key Features
+
+### Prescription Lifecycle Management
+
+* Digital prescription generation
+* Unique prescription identifiers
+* QR code generation
+* Prescription status tracking
+* Dispense tracking
+* Prescription validation
+
+### Medicine Traceability
+
+* Batch generation and management
+* Strip-level identification
+* Unique strip QR codes
+* Manufacturer attribution
+* Dispense tracking
+* Supply chain visibility
+
+### Consumer Verification
+
+* Prescription verification
+* Medicine strip verification
+* QR scanning support
+* Authenticity validation
+* Counterfeit detection
+
+### Administrative Controls
+
+* Doctor onboarding
+* Manufacturer onboarding
+* Account management
+* Account revocation
+* Platform governance
+
+### Security Features
+
+* JWT Authentication
+* Password Hashing (bcrypt)
+* Role-Based Access Control (RBAC)
+* Secure API Design
+* Transaction-safe Dispensing Operations
+* Unique Entity Identification
+
+---
+
+## System Architecture
+
+```text
+Authority
+│
+├── Registers Doctors
+├── Registers Manufacturers
+│
+▼
+
+Doctor
+│
+├── Creates Prescription
+├── Generates Prescription QR
+│
+▼
+
+Consumer
+│
+├── Orders Medicine
+│
+▼
+
+Dispense Process
+
+▲
+│
+
+Manufacturer
+│
+├── Creates Medicine Batches
+├── Generates Medicine Strips
+├── Generates Strip QR Codes
+│
+▼
+
+Consumer
+│
+├── Verifies Prescription
+├── Verifies Medicine Strip
+└── Scans QR Codes
+```
+
+---
+
+## User Roles
+
+### Authority
+
+The Authority acts as the governing body of the ecosystem.
+
+Capabilities:
 
 * Register doctors
 * Register manufacturers
-* Revoke doctors
-* Revoke manufacturers
-* View all registered doctors
-* View all registered manufacturers
-
-Only authority-approved entities can participate in the system.
+* View registered entities
+* Revoke accounts
+* Manage platform access
 
 ---
 
-## Secure Authentication & Authorization
+### Doctor
 
-### JWT Authentication
+Doctors issue digital prescriptions that become verifiable records within the system.
 
-All protected endpoints require JSON Web Tokens.
+Capabilities:
 
-### Role-Based Access Control
-
-Supported roles:
-
-* Authority
-* Doctor
-* Manufacturer
-
-Every route is protected according to role permissions.
-
-Examples:
-
-* Doctors cannot create medicine batches.
-* Manufacturers cannot issue prescriptions.
-* Unauthorized users cannot access protected resources.
+* Login securely
+* Create prescriptions
+* Generate QR codes
+* Track prescription status
+* View dispense information
 
 ---
 
-## Cryptographically Secure Identifiers
+### Manufacturer
 
-Every critical entity receives a unique public identifier:
+Manufacturers generate medicine batches and maintain production traceability.
 
-### Doctor UID
-
-```text
-DOC-XXXXXXXX
-```
-
-### Manufacturer UID
-
-```text
-MAN-XXXXXXXX
-```
-
-### Prescription UID
-
-```text
-RX-XXXXXXXX
-```
-
-### Batch UID
-
-```text
-BAT-XXXXXXXX
-```
-
-### Strip UID
-
-```text
-STR-XXXXXXXX
-```
-
-Internal database IDs remain private.
-
-Public operations use secure UIDs only.
-
----
-
-## Cryptographic Signatures
-
-Every prescription and medicine strip is protected using:
-
-```text
-HMAC-SHA256
-```
-
-Signatures ensure authenticity and integrity.
-
-The system can verify whether a prescription or medicine strip was genuinely generated by MedEye.
-
----
-
-## Anti-Counterfeit Medicine Verification
-
-Every medicine strip receives:
-
-* Unique Strip UID
-* Cryptographic Signature
-* QR Code
-
-Consumers can verify:
-
-* Medicine authenticity
-* Manufacturer identity
-* Drug information
-* Current medicine status
-
-If no valid record exists, the medicine is identified as counterfeit.
-
----
-
-## QR-Based Traceability
-
-Every prescription and medicine strip automatically receives a QR code.
-
-QR Payload:
-
-```json
-{
-  "uid": "STR-XXXXXXXX",
-  "signature": "..."
-}
-```
-
-Scanning a QR allows instant verification and traceability.
-
----
-
-## Medicine Batch Management
-
-Manufacturers can:
+Capabilities:
 
 * Create medicine batches
-* Generate thousands of uniquely identifiable medicine strips
-* Track all strips within a batch
-* View batch history
-
-Every strip remains linked to:
-
-```text
-Strip
-↓
-Batch
-↓
-Manufacturer
-```
-
-ensuring complete traceability.
+* Generate medicine strips
+* Produce strip-level QR codes
+* Track inventory
+* Monitor dispense status
 
 ---
 
-## Prescription Management
+### Consumer
 
-Doctors can:
+Consumers can independently verify medicines before consumption.
 
-* Issue prescriptions
-* Generate cryptographically signed prescription records
-* Track previously issued prescriptions
+Capabilities:
 
-Every prescription remains linked to:
-
-```text
-Prescription
-↓
-Doctor
-```
-
-allowing source verification.
+* Order medicine
+* Verify prescriptions
+* Verify medicine strips
+* Scan QR codes
+* Validate authenticity
 
 ---
 
-## Secure Medicine Dispensing
+## Screenshots
 
-The dispensing workflow validates:
+### Landing Page
 
-* Prescription existence
+![Landing Page](./screenshots/landing-page.png)
+
+The public entry point of MedEye providing an overview of the platform, verification workflow, and user ecosystem.
+
+---
+
+### Authority Dashboard
+
+![Authority Dashboard](./screenshots/authority-dashboard.png)
+
+The Authority Dashboard serves as the administrative control center of the platform.
+
+Features:
+
+* Doctor registration
+* Manufacturer registration
+* Account management
+* Status monitoring
+* Account revocation
+* Administrative statistics
+
+---
+
+### Doctor Dashboard
+
+![Doctor Dashboard](./screenshots/doctor-dashboard.png)
+
+The Doctor Dashboard enables healthcare professionals to issue and manage digital prescriptions.
+
+Features:
+
+* Prescription creation
+* QR generation
+* Prescription tracking
+* Dispense visibility
+* Prescription analytics
+* Status monitoring
+
+---
+
+### Manufacturer Dashboard
+
+![Manufacturer Dashboard](./screenshots/manufacturer-dashboard.png)
+
+The Manufacturer Dashboard provides visibility into medicine production and inventory management.
+
+Features:
+
+* Batch creation
+* Inventory generation
+* Production statistics
+* Batch management
+* Manufacturer profile management
+
+---
+
+### Batch Traceability View
+
+![Manufacturer Batches](./screenshots/manufacturer-batches.png)
+
+Expanded batch view demonstrating strip-level medicine traceability.
+
+Features:
+
+* Generated strip inventory
+* Individual strip identifiers
+* Strip QR codes
+* Dispense status tracking
+* Batch-to-strip relationship visualization
+
+This view demonstrates MedEye's ability to trace medicine units beyond the batch level, providing granular transparency throughout the pharmaceutical supply chain.
+
+---
+
+### Consumer Portal
+
+![Consumer Portal](./screenshots/consumer-portal.png)
+
+The Consumer Portal provides direct access to medicine ordering and authenticity verification.
+
+Features:
+
+* Medicine ordering
+* Prescription verification
+* Medicine strip verification
+* QR scanning interface
+
+---
+
+### Prescription Verification
+
+![Prescription Verification](./screenshots/prescription-verification.png)
+
+Real-time prescription authenticity validation.
+
+Verification includes:
+
+* Prescription identity
+* Doctor information
+* Drug information
 * Prescription status
-* Medicine strip existence
-* Medicine strip availability
-* Drug match validation
-
-Successful dispensing automatically:
-
-* Marks prescription as used
-* Marks medicine strip as dispensed
-* Creates a dispense record
-
-This prevents reuse and fraud.
+* Prescription legitimacy
 
 ---
 
-## Transaction-Safe Operations
+### Medicine Verification
 
-Critical workflows use PostgreSQL transactions.
+![Medicine Verification](./screenshots/medicine-verification.png)
 
-Examples:
+Medicine strip authentication and provenance verification.
 
-### Batch Creation
+Verification includes:
 
-```text
-Create Batch
-↓
-Generate Strips
-↓
-Commit
-```
+* Strip identity
+* Manufacturer information
+* Batch information
+* Dispense status
+* Authenticity validation
 
-### Medicine Dispensing
-
-```text
-Validate Prescription
-↓
-Validate Strip
-↓
-Record Dispense
-↓
-Update Statuses
-↓
-Commit
-```
-
-Failures automatically trigger rollback operations, preserving data integrity.
+This capability enables consumers to verify medicines before consumption and helps combat counterfeit pharmaceutical products.
 
 ---
 
-# System Architecture
+## Technology Stack
 
-```text
-                Authority
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-        ▼                       ▼
-
-      Doctors             Manufacturers
-        │                       │
-        ▼                       ▼
-
-  Prescriptions        Medicine Batches
-                                │
-                                ▼
-
-                         Medicine Strips
-
-        └───────────┬───────────┘
-                    ▼
-
-               Dispensing
-
-                    ▼
-
-               Verification
-```
-
----
-
-# Technology Stack
-
-## Backend
+### Backend
 
 * Node.js
 * Express.js
 * TypeScript
-
-## Database
-
 * PostgreSQL
 
-## Security
+### Frontend
+
+* EJS
+* Bootstrap 5
+* Vanilla JavaScript
+
+### Security
 
 * JWT Authentication
 * bcrypt Password Hashing
-* HMAC-SHA256 Signatures
+* RBAC Authorization
 
-## QR System
+### Infrastructure
 
-* QRCode
+* Docker
+* Docker Compose
+
+### Additional Libraries
+
+* QR Code Generation
+* HTML5 QR Scanner
+* UUID Generation
 
 ---
 
-# Database Design
+## Database Design
 
 Core entities:
 
-* doctors
-* manufacturers
-* medicine_batches
-* medicine_strips
-* prescriptions
-* dispenses
+* Authorities
+* Doctors
+* Manufacturers
+* Prescriptions
+* Medicine Batches
+* Medicine Strips
+* Dispenses
+
+The relationships between these entities enable complete prescription and medicine traceability throughout the healthcare supply chain.
 
 ---
 
-# Security Highlights
+## API Modules
 
-### Role-Based Access Control
-
-Only authorized users can access protected functionality.
-
-### Password Hashing
-
-Passwords are stored using bcrypt hashing.
-
-### JWT Authentication
-
-Protected routes require valid JWT tokens.
-
-### Signature Verification
-
-Every prescription and medicine strip is cryptographically verifiable.
-
-### UID-Based Public Access
-
-Internal database IDs are never exposed publicly.
-
----
-
-# Example Workflow
-
-## Manufacturer Flow
+### Authentication
 
 ```text
-Authority
-↓
-Create Manufacturer
-↓
-Manufacturer Login
-↓
-Create Batch
-↓
-Generate Strips
-↓
-Generate QR Codes
+/auth
+```
+
+### Authority Management
+
+```text
+/authority
+```
+
+### Doctor Operations
+
+```text
+/doctors
+```
+
+### Manufacturer Operations
+
+```text
+/manufacturers
+```
+
+### Verification Services
+
+```text
+/verify
+```
+
+### Ordering System
+
+```text
+/order
 ```
 
 ---
 
-## Doctor Flow
+## Installation
 
-```text
-Authority
-↓
-Create Doctor
-↓
-Doctor Login
-↓
-Create Prescription
-↓
-Generate QR Code
+### Clone Repository
+
+```bash
+git clone <repository-url>
+cd medeye
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Start PostgreSQL
+
+```bash
+docker-compose up -d
+```
+
+### Configure Environment Variables
+
+Create a `.env` file:
+
+```env
+PORT=3000
+DATABASE_URL=your_database_url
+JWT_SECRET=your_secret_key
+```
+
+### Initialize Database
+
+```bash
+npm run init-db
+```
+
+### Start Backend
+
+```bash
+npm run dev
+```
+
+### Start Frontend
+
+```bash
+node frontend/server.js
 ```
 
 ---
 
-## Consumer Flow
+## Project Highlights
 
-```text
-Scan QR
-↓
-Verify Authenticity
-↓
-Verify Source
-↓
-Dispense Medicine
-↓
-Prevent Reuse
-```
+This project demonstrates practical experience with:
+
+* Full-Stack Development
+* REST API Design
+* Authentication & Authorization
+* Database Design
+* Transaction Management
+* QR-Based Verification Systems
+* Healthcare Technology Workflows
+* Supply Chain Traceability
+* Role-Based Access Control
+* Secure Application Architecture
 
 ---
 
-# Future Enhancements
+## Future Enhancements
 
-* QR Scanner Frontend
+Potential future improvements include:
+
+* React / Next.js Frontend
 * Mobile Application
-* Analytics Dashboard
-* Audit Logs
-* Expiry Monitoring
-* Supply Chain Tracking
-* Blockchain-Based Distributed Verification
+* Advanced Analytics Dashboard
+* Cloud Deployment
+* Audit Logging
+* Multi-Authority Support
+* QR Signature Verification
+* Real-Time Notifications
+* CI/CD Pipelines
+* Blockchain-Based Traceability
 
 ---
 
-# Author
+## License
 
-Areez
-
-Built as a healthcare security and medicine traceability platform demonstrating secure backend engineering, cryptographic verification, role-based authorization, transactional database design, and QR-based verification systems.
+This project is intended for educational, research, and portfolio purposes.
