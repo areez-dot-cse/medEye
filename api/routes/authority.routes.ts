@@ -184,4 +184,50 @@ router.patch("/doctors/:uid/revoke", authenticate, authorizeRole("authority"), a
     }
 );
 
+router.get("/doctors", authenticate, authorizeRole("authority"), async (req,res)=>{
+        try{
+            const result = await pool.query(
+                    `SELECT
+                        doctor_uid,
+                        name,
+                        license_number,
+                        email,
+                        status
+                    FROM doctors
+                    ORDER BY name`
+                );
+            return res.status(200).json(result.rows);
+
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                message: "Failed to fetch doctors"
+            });
+        }
+    }
+);
+
+router.get("/manufacturers", authenticate, authorizeRole("authority"), async (req,res)=>{
+        try{
+                const result = await pool.query(
+                    `SELECT
+                        manufacturer_uid,
+                        company_name,
+                        license_number,
+                        email,
+                        status
+                    FROM manufacturers
+                    ORDER BY company_name`
+                );
+            return res.status(200).json(result.rows);
+
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                message: "Failed to fetch manufacturers"
+            });
+        }
+    }
+);
+
 export default router;

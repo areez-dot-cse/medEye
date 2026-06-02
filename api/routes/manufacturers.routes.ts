@@ -178,60 +178,83 @@ router.get("/me", authenticate, authorizeRole("manufacturer"), async (req, res) 
   },
 );
 
-router.get("/batches/:batchUid", authenticate, authorizeRole("manufacturer"), async (req,res)=>{
-    try{
-            const manufacturerUid = (req as any).user.uid;
-            const manufacturerResult = await pool.query(
-                  ` SELECT id
-                    FROM manufacturers
-                    WHERE manufacturer_uid=$1
-                    `, [manufacturerUid]
-                );
-            if(manufacturerResult.rows.length===0){
-                return res.status(404).json({
-                    message: "Manufacturer not found"
-                });
-            }
-            const manufacturerId = manufacturerResult.rows[0].id;
-            const batchResult = await pool.query(
-                    `SELECT *
-                    FROM medicine_batches
-                    WHERE
-                        batch_uid=$1
-                        AND
-                        manufacturer_id=$2
-                    `,[req.params.batchUid, manufacturerId]
-                );
+router.get("/batches/:batchUid", authenticate, authorizeRole("manufacturer"), async (req, res) => {
+    try {
+      const manufacturerUid = (req as any).user.uid;
 
-            if(batchResult.rows.length===0){
-                return res.status(404).json({
-                    message:"Batch not found"
-                });
-            }
-            const batch = batchResult.rows[0];
-            const stripsResult = await pool.query(
-                    `SELECT
-                        strip_uid,
-                        status,
-                        created_at
-                    FROM medicine_strips
-                    WHERE batch_id=$1
-                    ORDER BY created_at
-                    `,
-                    [batch.id]
-                );
-            return res.status(200).json({
-                batch,
-                strips: stripsResult.rows
-            });
+      const manufacturerResult = await pool.query(
+        `SELECT id
+          FROM manufacturers
+          WHERE manufacturer_uid=$1`,
+        [manufacturerUid],
+      );
 
-        }catch(error){
-            console.error(error);
-            return res.status(500).json({
-                message: "Failed to fetch batch"
-            });
-        }
+      if (manufacturerResult.rows.length === 0) {
+        return res.status(404).json({
+          message: "Manufacturer not found",
+        });
+      }
+
+      const manufacturerId = manufacturerResult.rows[0].id;
+
+      const batchResult = await pool.query(
+        `SELECT *
+         FROM medicine_batches
+         WHERE
+         batch_uid=$1
+         AND
+         manufacturer_id=$2`,
+        [req.params.batchUid, manufacturerId],
+      );
+
+      if (batchResult.rows.length === 0) {
+        return res.status(404).json({
+          message: "Batch not found",
+        });
+      }
+
+      const batch = batchResult.rows[0];
+
+      const stripsResult = await pool.query(
+        `SELECT
+         strip_uid,
+         signature,
+         status,
+         created_at
+         FROM medicine_strips
+         WHERE batch_id=$1
+         ORDER BY created_at`,
+        [batch.id],
+      );
+
+      const strips = await Promise.all(
+        stripsResult.rows.map(async (strip) => {
+          const qr = await generateQr(strip.strip_uid, strip.signature);
+
+          return {
+            strip_uid: strip.strip_uid,
+
+            status: strip.status,
+
+            created_at: strip.created_at,
+
+            qr,
+          };
+        }),
+      );
+
+      return res.status(200).json({
+        batch,
+        strips,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Failed to fetch batch",
+      });
     }
+  },
 );
+
 
 export default router;

@@ -93,8 +93,20 @@ router.get("/prescriptions", authenticate, authorizeRole("doctor"), async (req,r
                     ORDER BY issued_at DESC
                     `, [doctorId]
                 );
+            const prescriptionsWithQr = await Promise.all(prescriptions.rows.map( async (prescription)=>{
+                   const qr = await generateQr(
+                        prescription.prescription_uid,
+                        prescription.signature
+                    );
 
-            return res.status(200).json(prescriptions.rows);
+                return {
+                    ...prescription,
+                    qr
+                };
+            }
+        )
+    );
+            return res.status(200).json(prescriptionsWithQr);
 
         }catch(error){
             console.error(error);
@@ -138,18 +150,22 @@ router.get("/me", authenticate, authorizeRole("doctor"), async (req,res)=>{
 router.get("/prescriptions/:prescriptionUid", authenticate, authorizeRole("doctor"), async (req,res)=>{
         try{
             const doctorUid = (req as any).user.uid;
+
             const doctorResult = await pool.query(
                     `SELECT id
                     FROM doctors
                     WHERE doctor_uid=$1
-                    `, [doctorUid]
+                    `,[doctorUid]
                 );
+
             if(doctorResult.rows.length===0){
                 return res.status(404).json({
                     message: "Doctor not found"
                 });
             }
+
             const doctorId = doctorResult.rows[0].id;
+
             const prescriptionResult = await pool.query(
                     `SELECT *
                     FROM prescriptions
@@ -160,6 +176,7 @@ router.get("/prescriptions/:prescriptionUid", authenticate, authorizeRole("docto
                     `,[ req.params.prescriptionUid,
                         doctorId]
                 );
+
             if(prescriptionResult.rows.length===0){
                 return res.status(404).json({
                     message: "Prescription not found"
@@ -174,13 +191,16 @@ router.get("/prescriptions/:prescriptionUid", authenticate, authorizeRole("docto
                     JOIN medicine_strips ms
                         ON d.strip_id = ms.id
                     WHERE d.prescription_id=$1
-                    `,[prescription.id]
+                    `, [prescription.id]);
+            const qr = await generateQr(
+                    prescription.prescription_uid,
+                    prescription.signature
                 );
             return res.status(200).json({
                 prescription,
-                dispense: dispenseResult.rows[0] || null
+                dispense: dispenseResult.rows[0] || null,
+                qr
             });
-
         }catch(error){
             console.error(error);
             return res.status(500).json({
